@@ -96,7 +96,7 @@ sudo bash -c 'cat <<EOF > /etc/apache2/conf-available/glpi.conf
 EOF'
 
 # Alteração do arquivo php.ini
-sudo sed -i 's/^session.cookie_httponly = .*/session.cookie_httponly = 1/' /etc/php/8.3/apache2/php.ini
+sudo sed -i '/^session.cookie_httponly/c\session.cookie_httponly = 1' /etc/php/8.3/apache2/php.ini
 
 # Habilitando módulos e reiniciando o Apache
 sudo a2enmod rewrite
@@ -105,5 +105,5 @@ sudo systemctl reload apache2
 sudo systemctl restart apache2
 
 # Mensagens finais
-echo "Cola com o pai que o inimigo cai!"
-echo "By Diarrury"
+#"Cola com o pai que o inimigo cai!"
+#"By Diarrury"
