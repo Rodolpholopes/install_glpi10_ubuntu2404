@@ -97,13 +97,13 @@ EOF'
 
 # Alteração do arquivo php.ini
 sudo sed -i '/^session.cookie_httponly/c\session.cookie_httponly = 1' /etc/php/8.3/apache2/php.ini
+sudo sed -i "/^;date.timezone =/c\date.timezone = $(cat /etc/timezone | sed 's/\//\\\//g')" /etc/php/8.3/apache2/php.ini
 
 # Habilitando módulos e reiniciando o Apache
 sudo a2enmod rewrite
 sudo a2enconf glpi.conf
-sudo systemctl reload apache2
+sudo rm -rf /var/www/html/glpi/install/install.php
 sudo systemctl restart apache2
-
 # Mensagens finais
-#"Cola com o pai que o inimigo cai!"
+#Cola com o pai que o inimigo cai!"
 #"By Diarrury"
