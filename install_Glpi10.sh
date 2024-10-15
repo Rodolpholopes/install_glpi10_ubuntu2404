@@ -102,7 +102,6 @@ sudo sed -i "/^;date.timezone =/c\date.timezone = $(cat /etc/timezone | sed 's/\
 # Habilitando módulos e reiniciando o Apache
 sudo a2enmod rewrite
 sudo a2enconf glpi.conf
-sudo rm -rf /var/www/html/glpi/install/install.php
 sudo systemctl restart apache2
 # Mensagens finais
 #Cola com o pai que o inimigo cai!"
