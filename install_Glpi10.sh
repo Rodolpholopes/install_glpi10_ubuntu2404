@@ -22,7 +22,7 @@ sudo apt update && sudo apt upgrade -y
 sudo apt purge ntp
 sudo apt install -y openntpd
 sudo service openntpd stop
-sudo dpkg-reconfigure tzdata
+sudo DEBIAN_FRONTEND=text dpkg-reconfigure tzdata
 echo "servers pool.ntp.br" | sudo tee /etc/openntpd/ntpd.conf
 sudo systemctl enable openntpd
 sudo systemctl start openntpd
