@@ -15,52 +15,27 @@ LOGFILE="/var/log/install_glpi.log"
 exec > >(tee -i $LOGFILE)
 exec 2>&1
 
-# Passo 1: Remover completamente pacotes antigos de Apache2, PHP e MariaDB
-
-echo "Removendo pacotes Apache2, PHP e MariaDB..."
-
-# Parar os serviços
-systemctl stop apache2 || true
-systemctl stop mariadb || true
-
-# Remover Apache2 e suas dependências
-apt purge -y apache2* libapache2* apache2-doc apache2-utils
-apt autoremove -y
-rm -rf /etc/apache2 /var/www/html /var/log/apache2
-
-# Remover PHP e suas dependências
-apt purge -y 'php*'
-apt autoremove -y
-rm -rf /etc/php /var/log/php
-
-# Remover MariaDB e suas dependências
-apt purge -y mariadb-server mariadb-client mariadb-common mariadb-server-core mariadb-client-core
-apt autoremove -y
-rm -rf /etc/mysql /var/lib/mysql /var/log/mysql
-
-echo "Pacotes antigos removidos. Ambiente limpo para nova instalação."
-
 # Atualização do SO
-sudo apt update && sudo apt upgrade -y
+apt update && sudo apt upgrade -y
 
 # Definindo TimeZone
-sudo apt purge ntp
-sudo apt install -y openntpd
-sudo service openntpd stop
-sudo DEBIAN_FRONTEND=text dpkg-reconfigure tzdata
+apt purge ntp
+apt install -y openntpd
+service openntpd stop
+DEBIAN_FRONTEND=text dpkg-reconfigure tzdata
 echo "servers pool.ntp.br" | sudo tee /etc/openntpd/ntpd.conf
-sudo systemctl enable openntpd
-sudo systemctl start openntpd
+systemctl enable openntpd
+systemctl start openntpd
 
 # Instalação de pacotes necessários
-sudo apt install -y xz-utils bzip2 unzip curl vim git apache2 libapache2-mod-php php-soap php php-{apcu,cli,common,curl,gd,imap,ldap,mysql,xmlrpc,xml,mbstring,bcmath,intl,zip,redis,bz2}
+apt install -y xz-utils bzip2 unzip curl vim git apache2 libapache2-mod-php php-soap php php-{apcu,cli,common,curl,gd,imap,ldap,mysql,xmlrpc,xml,mbstring,bcmath,intl,zip,redis,bz2}
 
 # Banco de Dados
-sudo apt install -y mariadb-server
+apt install -y mariadb-server
 
 # Definindo novo timezone no DB e criando root
-sudo mysql_tzinfo_to_sql /usr/share/zoneinfo | sudo mysql -u root -p mysql
-sudo systemctl restart mariadb
+mysql_tzinfo_to_sql /usr/share/zoneinfo | sudo mysql -u root -p mysql
+systemctl restart mariadb
 
 # Criação de usuário DB glpi
 # Solicitar ao usuário o nome do banco de dados
@@ -85,7 +60,7 @@ fi
 read -p "Digite a senha do usuario SQL: " psswd
 
 # Criar o banco de dados e o usuário
-sudo mysql -u root -p <<MYSQL_SCRIPT
+mysql -u root -p <<MYSQL_SCRIPT
 CREATE DATABASE $nome_banco DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
 CREATE USER '$nome_user'@'localhost' IDENTIFIED BY '$psswd';
 GRANT ALL PRIVILEGES ON $nome_banco.* TO '$nome_user'@'localhost';
@@ -96,16 +71,16 @@ MYSQL_SCRIPT
 cd /tmp
 wget -v -O glpi.tgz https://github.com/glpi-project/glpi/releases/download/10.0.16/glpi-10.0.16.tgz
 tar -zxvf glpi.tgz
-sudo mv -v glpi/ /var/www/html/
+mv -v glpi/ /var/www/html/
 
 # Alterando permissões
-sudo chown -Rfv www-data:www-data /var/www/html/glpi/
-sudo find /var/www/html/glpi/ -type d -exec chmod -v 755 {} \;
-sudo find /var/www/html/glpi/ -type f -exec chmod -v 644 {} \;
-sudo chmod -Rv 777 /var/www/html/glpi/files/_log
+chown -Rfv www-data:www-data /var/www/html/glpi/
+find /var/www/html/glpi/ -type d -exec chmod -v 755 {} \;
+find /var/www/html/glpi/ -type f -exec chmod -v 644 {} \;
+chmod -Rv 777 /var/www/html/glpi/files/_log
 
 # Configuração do Apache para o GLPI
-sudo bash -c 'cat <<EOF > /etc/apache2/conf-available/glpi.conf
+bash -c 'cat <<EOF > /etc/apache2/conf-available/glpi.conf
 <VirtualHost *:80>
         DocumentRoot /var/www/html/glpi/public
         ErrorLog ${APACHE_LOG_DIR}/glpi-error.log
@@ -121,13 +96,10 @@ sudo bash -c 'cat <<EOF > /etc/apache2/conf-available/glpi.conf
 EOF'
 
 # Alteração do arquivo php.ini
-sudo sed -i '/^session.cookie_httponly/c\session.cookie_httponly = 1' /etc/php/8.3/apache2/php.ini
-sudo sed -i "/^;date.timezone =/c\date.timezone = $(cat /etc/timezone | sed 's/\//\\\//g')" /etc/php/8.3/apache2/php.ini
+sed -i '/^session.cookie_httponly/c\session.cookie_httponly = 1' /etc/php/8.3/apache2/php.ini
+sed -i "/^;date.timezone =/c\date.timezone = $(cat /etc/timezone | sed 's/\//\\\//g')" /etc/php/8.3/apache2/php.ini
 
 # Habilitando módulos e reiniciando o Apache
-sudo a2enmod rewrite
-sudo a2enconf glpi.conf
-sudo systemctl restart apache2
-# Mensagens finais
-#Cola com o pai que o inimigo cai!"
-#"By Diarrury"
+a2enmod rewrite
+a2enconf glpi.conf
+systemctl restart apache2
