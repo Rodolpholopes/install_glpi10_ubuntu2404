@@ -15,6 +15,31 @@ LOGFILE="/var/log/install_glpi.log"
 exec > >(tee -i $LOGFILE)
 exec 2>&1
 
+# Passo 1: Remover completamente pacotes antigos de Apache2, PHP e MariaDB
+
+echo "Removendo pacotes Apache2, PHP e MariaDB..."
+
+# Parar os serviços
+systemctl stop apache2 || true
+systemctl stop mariadb || true
+
+# Remover Apache2 e suas dependências
+apt purge -y apache2* libapache2* apache2-doc apache2-utils
+apt autoremove -y
+rm -rf /etc/apache2 /var/www/html /var/log/apache2
+
+# Remover PHP e suas dependências
+apt purge -y 'php*'
+apt autoremove -y
+rm -rf /etc/php /var/log/php
+
+# Remover MariaDB e suas dependências
+apt purge -y mariadb-server mariadb-client mariadb-common mariadb-server-core mariadb-client-core
+apt autoremove -y
+rm -rf /etc/mysql /var/lib/mysql /var/log/mysql
+
+echo "Pacotes antigos removidos. Ambiente limpo para nova instalação."
+
 # Atualização do SO
 sudo apt update && sudo apt upgrade -y
 
