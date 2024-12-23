@@ -28,7 +28,7 @@ systemctl enable openntpd
 systemctl start openntpd
 
 # Instalação de pacotes necessários
-apt install -y xz-utils bzip2 unzip curl vim git apache2 libapache2-mod-php php-soap php php-{apcu,cli,common,curl,gd,imap,ldap,mysql,xmlrpc,xml,mbstring,bcmath,intl,zip,redis,bz2}
+apt install -y xz-utils bzip2 unzip curl vim git apache2 libapache2-mod-php8.3 php8.3-soap php8.3 php8.3-{apcu,cli,common,curl,gd,imap,ldap,mysql,xmlrpc,xml,mbstring,bcmath,intl,zip,redis,bz2}
 
 # Banco de Dados
 apt install -y mariadb-server
@@ -69,7 +69,7 @@ MYSQL_SCRIPT
 
 # Baixando o GLPI
 cd /tmp
-wget -v -O glpi.tgz https://github.com/glpi-project/glpi/releases/download/10.0.16/glpi-10.0.16.tgz
+wget -v -O glpi.tgz https://github.com/glpi-project/glpi/releases/download/10.0.17/glpi-10.0.17.tgz
 tar -zxvf glpi.tgz
 mv -v glpi/ /var/www/html/
 
